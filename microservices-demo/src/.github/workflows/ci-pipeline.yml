@@ -1,0 +1,57 @@
+name: Monorepo Baseline Simulation
+
+# CRUCIAL CONTROL: Trigger on EVERY push to the repository.
+# We intentionally omit the "paths:" filter here so we can measure the unoptimized blast radius.
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      # CRUCIAL CONTROL: fail-fast must be false. 
+      # If one service fails, we want the other matrix builds to finish so we can collect complete execution logs.
+      fail-fast: false
+      
+      # Select a subset of services from the Online Boutique demo to run.
+      # You can add or remove folders here depending on how many services you moved over.
+      matrix:
+        service: [
+          'adservice', 
+          'cartservice', 
+          'currencyservice', 
+          'emailservice', 
+          'paymentservice', 
+          'shippingservice',
+          'checkoutservice',
+          'frontend',
+          'productcatalogservice',
+          'recommendationservice',
+          'shoppingassistantservice',
+          'loadgenerator'
+        ]
+
+    steps:
+      - name: Checkout Monorepo Code
+        uses: actions/checkout@v4
+
+      # This step helps you track exactly when the job started within the execution container
+      - name: Log Start Event
+        run: |
+          echo "Starting simulation run for: ${{ matrix.service }}"
+          echo "Timestamp: $(date -u)"
+
+      # Simulates building the backend service container image using its local Dockerfile
+      - name: Compile and Build Docker Image
+        run: |
+          cd src/${{ matrix.service }}
+          docker build -t test-build-${{ matrix.service }}:latest .
+
+      # Log successful completion metadata for analysis parsing
+      - name: Log Execution Metatdata
+        run: |
+          echo "Successfully compiled and built container asset for: ${{ matrix.service }}"
+          echo "Ending Timestamp: $(date -u)"
