@@ -48,7 +48,12 @@ jobs:
       - name: Compile and Build Docker Image
         run: |
           cd src/${{ matrix.service }}
-          docker build -t test-build-${{ matrix.service }}:latest .
+          if [ "${{ matrix.service }}" = "cartservice" ]; then
+            echo "Detected .NET cartservice. Pointing to nested Dockerfile location..."
+            docker build -t test-build-${{ matrix.service }}:latest -f src/Dockerfile .
+          else
+            docker build -t test-build-${{ matrix.service }}:latest .
+          fi
 
       # Log successful completion metadata for analysis parsing
       - name: Log Execution Metatdata
