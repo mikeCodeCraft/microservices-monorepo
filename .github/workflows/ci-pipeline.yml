@@ -45,14 +45,16 @@ jobs:
           echo "Timestamp: $(date -u)"
 
       # Simulates building the backend service container image using its local Dockerfile
+      # Simulates building the backend service container image cleanly from the repository root context
+      # This resolves the .NET project file resolution issues for cartservice
       - name: Compile and Build Docker Image
         run: |
-          cd src/${{ matrix.service }}
           if [ "${{ matrix.service }}" = "cartservice" ]; then
-            echo "Detected .NET cartservice. Pointing to nested Dockerfile location..."
-            docker build -t test-build-${{ matrix.service }}:latest -f src/Dockerfile .
+            echo "Building cartservice using root execution context..."
+            docker build -t test-build-${{ matrix.service }}:latest -f src/cartservice/src/Dockerfile src/cartservice
           else
-            docker build -t test-build-${{ matrix.service }}:latest .
+            echo "Building ${{ matrix.service }} from context..."
+            docker build -t test-build-${{ matrix.service }}:latest src/${{ matrix.service }}
           fi
 
       # Log successful completion metadata for analysis parsing
