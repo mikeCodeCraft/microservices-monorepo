@@ -50,8 +50,8 @@ jobs:
       - name: Compile and Build Docker Image
         run: |
           if [ "${{ matrix.service }}" = "cartservice" ]; then
-            echo "Building cartservice using root execution context..."
-            docker build -t test-build-${{ matrix.service }}:latest -f src/cartservice/src/Dockerfile src/cartservice
+            echo "Building cartservice using the nested context..."
+            docker build -t test-build-${{ matrix.service }}:latest -f src/cartservice/src/Dockerfile src/cartservice/src
           else
             echo "Building ${{ matrix.service }} from context..."
             docker build -t test-build-${{ matrix.service }}:latest src/${{ matrix.service }}
